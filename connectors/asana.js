@@ -4,6 +4,7 @@ var asanaModels = require('../models/asana.js');
 var Workspace = asanaModels.Workspace;
 var Project = asanaModels.Project;
 var Task = asanaModels.Task;
+var Story = asanaModels.Story;
 
 function AsanaConnector() {
   this.apiKey = null;
@@ -108,6 +109,40 @@ AsanaConnector.prototype.getTasksByProject = function (project, callback) {
       }
 
       return callback(null, tasks);
+    });
+  });
+  req.on('error', function (err) {
+    return callback(err);
+  });
+  req.end();
+}
+
+AsanaConnector.prototype.getStories = function (task, callback) {
+  var options = {
+    hostname : this.apiUrl,
+    path : this.basePath + "tasks/" + task.id.toString() + "/stories",
+    method : "GET",
+    auth : this.apiKey +":"
+  };
+
+  var req = https.request(options, function (res) {
+    var content = "";
+
+    res.on('data', function (data) {
+      content += data.toString();
+    });
+
+    res.on('end', function () {
+      var respObj = JSON.parse(content);
+
+      var stories = [];
+      for (var i=0; i < respObj.data.length; i++) {
+        var s = new Story(respObj.data[i]);
+        s.target = task;
+        stories.push(s);
+      }
+
+      return callback(null, stories);
     });
   });
   req.on('error', function (err) {

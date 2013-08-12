@@ -40,3 +40,14 @@ var taskSchema = new Schema({
 });
 
 module.exports.Task = exports.Task = mongoose.model('Task', taskSchema);
+
+var storySchema = new Schema({
+  id : Number,
+  created_at : Date,
+  text : String,
+  target : { id : Number, name : String },
+  source : String,
+  type : String
+});
+
+module.exports.Story = exports.Story = mongoose.model('Story', storySchema);
