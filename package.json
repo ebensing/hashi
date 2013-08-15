@@ -9,7 +9,8 @@
   "dependencies" : {
     "mongoose" : "3.7.0",
     "github" : "*",
-    "async" : "*"
+    "async" : "*",
+    "mongoose-text-search" : "*"
   },
   "repository": {
     "type": "git",

@@ -26,12 +26,13 @@ GithubConnector.prototype.setupAuth = function () {
   });
 }
 
-GithubConnector.prototype.getAllRepoIssues = function (repo, callback) {
+GithubConnector.prototype.getAllRepoIssues = function (repo, user, callback) {
   this.setupAuth();
 
   var msg = {
     user : repo.user,
     repo : repo.name,
+    assignee : user,
     per_page : 100
   };
   var rIssues = [];

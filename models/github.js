@@ -16,7 +16,9 @@ var issueSchema = new Schema({
   closed_at : Date,
   body : String,
   repo : { user : String, name : String }
-});
+}, { _id : false });
+
+issueSchema.index({ repo : 1, 'assignee.login' : 1 });
 
 module.exports.Issue = exports.Issue = mongoose.model('Issue', issueSchema);
 
@@ -32,6 +34,6 @@ var commentSchema = new Schema({
     number : Number,
     repo : { name : String, user : String }
   }
-});
+}, { _id : false });
 
 module.exports.Comment = exports.Comment = mongoose.model('Comment', commentSchema);
