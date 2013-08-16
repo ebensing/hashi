@@ -19,12 +19,15 @@ GithubConnector.setAuthInfo(config.githubInfo.userName,
 
 function main() {
 
+  var workMap = {};
+  var projectMap = {};
+
   var dataGathered = false;
   function cont(err) {
     if (err) {
       return onError(err);
     }
-    dataGathered && parse(repos);
+    dataGathered && parse(repos, workMap, projectMap);
     dataGathered = true;
   }
 
@@ -33,9 +36,19 @@ function main() {
     if (err) {
       return onError(err);
     }
+    // make the workspace map
+    for (var i=0; i < workspaces.length; i++) {
+      var w = workspaces[i];
+      workMap[w.name] = w.id;
+    }
     getMonitoredProjects(workspaces, function (err, projects) {
       if (err) {
         return onError(err);
+      }
+      // make the project map
+      for (var i=0; i < projects.length; i++) {
+        var p = projects[i];
+        projectMap[p.name] = p.id;
       }
       getMonitoredTasks(projects, cont);
     });
@@ -47,7 +60,9 @@ function main() {
     var repo = {
       user : arr[0],
       name : arr[1],
-      assignee : item.githubUser
+      assignee : item.githubUser,
+      project : item.project,
+      workspace : item.workspace
     };
     return repo;
   });
@@ -58,7 +73,7 @@ function main() {
 
 // once we get here, all of the data has been collected and is saved in the
 // database. Time to process it and update anything that needs it
-function parse(repos) {
+function parse(repos, workMap, projectMap) {
   console.log("All Data collected!");
 
   async.each(repos, function (repo, callback) {
@@ -73,14 +88,21 @@ function parse(repos) {
       if (err) {
         return callback(err)
       }
-
+      // set the project & workspace on all the issues
+      issues = issues.map(function (item) {
+        item.p_id = projectMap[repo.project];
+        item.w_id = workMap[repo.workspace];
+        return item;
+      });
       async.each(issues, processIssue, callback);
     });
   }, function (err) {
-    return onError(err);
+    if (err) {
+      return onError(err);
+    }
+    console.log("done");
+    mongoose.disconnect();
   });
-
-  mongoose.disconnect();
 }
 
 function processIssue(issue, callback) {
@@ -97,8 +119,43 @@ function processIssue(issue, callback) {
       syncIssue(issue, output.results[0], callback);
     } else {
       // no match found, time to create a new task in Asana
-      createAsanaTask(issue, callback);
+      createAsanaTask(issue, tag, callback);
     }
+  });
+}
+
+function syncIssue(issue, task, callback) {
+  console.log("syncing issue");
+  callback();
+}
+
+function syncComments(issue, task, callback) {
+
+}
+
+function createAsanaTask(issue, tag, callback) {
+
+  var task = new Task({
+    completed : false,
+    name : issue.title,
+    notes : tag.replace(/\"/g,'') + "\n" + issue.body,
+    assignee_status : "inbox",
+    projects : [{ id : issue.p_id }],
+    workspace : { id : issue.w_id }
+  });
+
+  AsanaConnector.createTask(task, function (err, cTask) {
+    if (err) {
+      return callback(err);
+    }
+
+    var raw = cTask.toObject();
+    Task.findOneAndUpdate({ id : cTask.id }, raw, { upsert : true }, function (err, tsk) {
+      if (err) {
+        return callback(err);
+      }
+      syncComments(issue, task, callback);
+    });
   });
 }
 
@@ -115,7 +172,6 @@ function getAllIssues(repos, callback) {
 
 function saveItems(items, iClass, callback) {
   async.map(items, function (item, cb) {
-    // find a better way to do this?
     var raw = item.toObject();
     iClass.findOneAndUpdate({ id : item.id }, raw, { upsert : true }, cb);
   }, callback);
@@ -187,6 +243,7 @@ function getMonitoredTasks(projects, callback) {
 
 function onError(err) {
   console.log(err);
+  mongoose.disconnect();
 }
 mongoose.connect("mongodb://localhost/taskSync", function (err) {
   if (err) throw err;

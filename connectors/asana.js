@@ -1,5 +1,6 @@
 
 var https = require('https');
+var qs = require('querystring');
 var asanaModels = require('../models/asana.js');
 var Workspace = asanaModels.Workspace;
 var Project = asanaModels.Project;
@@ -148,6 +149,59 @@ AsanaConnector.prototype.getStories = function (task, callback) {
   req.on('error', function (err) {
     return callback(err);
   });
+  req.end();
+}
+
+AsanaConnector.prototype.createTask = function (task, callback) {
+
+  // prepare the data to send
+  var raw = task.toObject();
+  raw.assignee = "me";
+  raw.workspace = task.workspace.id;
+  raw.projects[0] = task.projects[0].id;
+  var sendStr = qs.stringify(raw);
+
+  // prepare the POST options
+  var options = {
+    hostname : this.apiUrl,
+    path : this.basePath + "tasks",
+    method : "POST",
+    auth : this.apiKey +":",
+    headers : {
+      'Content-Type' : 'application/x-www-form-urlencoded',
+      'Content-Length' : sendStr.length
+    }
+  };
+
+  var req = https.request(options, function (res) {
+    res.setEncoding('utf-8');
+    var content = "";
+
+    res.on('data', function (data) {
+      content += data.toString();
+    });
+
+    res.on('end', function () {
+      var respObj = JSON.parse(content).data;
+
+      task.id = respObj.id;
+      task.assignee = respObj.assignee;
+      task.workspace = respObj.workspace;
+      task.projects[0] = respObj.projects[0];
+      task.created_at = respObj.created_at;
+      task.modified_at = respObj.modified_at;
+
+      var rt = new Task(task);
+
+      return callback(null, rt);
+    });
+  });
+  req.on('error', function (err) {
+    return callback(err);
+  });
+
+  // actually send the data
+  req.write(sendStr);
   req.end();
 }
 

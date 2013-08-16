@@ -15,7 +15,9 @@ var issueSchema = new Schema({
   updated_at : Date,
   closed_at : Date,
   body : String,
-  repo : { user : String, name : String }
+  repo : { user : String, name : String },
+  p_id : Number,
+  w_id : Number
 }, { _id : false });
 
 issueSchema.index({ repo : 1, 'assignee.login' : 1 });
