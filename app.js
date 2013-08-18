@@ -165,7 +165,6 @@ function syncIssue(issue, task, callback) {
     task.completed = true;
     task.completed_at = issue.closed_at;
     changeSet.completed = true;
-    changeSet.completed_at = issue.closed_at;
   }
 
   var body = "(GH " + issue.number.toString() +")\n"
