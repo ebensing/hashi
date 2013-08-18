@@ -144,6 +144,13 @@ GithubConnector.prototype.createWebHook = function(repo, events, url, callback) 
 
   this.github.repos.createHook(msg, function (err, hook) {
     if (err) {
+      if (err.message) {
+        try {
+          err = JSON.parse(err.message);
+        } catch (e) {
+
+        }
+      }
       return callback(err);
     }
 

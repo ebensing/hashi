@@ -120,8 +120,8 @@ function checkHooks(repo) {
       var url = config.url + ":" + config.port.toString();
       GithubConnector.createWebHook(repo, ["issues"], url, function (err, hook) {
         if (err) {
-          if (err.message &&
-            err.message.errors[0].message != "Hook already exists on this repository") {
+          if (err.errors && err.errors.length &&
+            err.errors[0].message != "Hook already exists on this repository") {
             return onError(err);
           } else {
             console.log("Hook already exsits, do nothing");
