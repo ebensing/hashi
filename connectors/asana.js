@@ -235,11 +235,13 @@ AsanaConnector.prototype.updateTask = function (task, changeSet, callback) {
     });
 
     res.on('end', function () {
-      var respObj = JSON.parse(content).data;
+      var respObj = JSON.parse(content);
 
       if (respObj.message) {
-        return callback(new Error("Task Update Error, Id: " + task.toString()));
+        return callback(new Error("Task Update Error, Id: " + task.toString()
+            + " " + respObj.message));
       }
+
 
       task.save(callback);
     });
