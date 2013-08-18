@@ -309,6 +309,7 @@ mongoose.connect("mongodb://localhost/taskSync", function (err) {
       }
 
       var issue = new Issue(reqObj.issue);
+      var raw = issue.toObject();
       Issue.findOneAndUpdate({ id : issue.id }, raw, { upsert : true }, function (err, is) {
         if (err) {
           return onError(err);
