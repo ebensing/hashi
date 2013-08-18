@@ -39,3 +39,14 @@ var commentSchema = new Schema({
 }, { _id : false });
 
 module.exports.Comment = exports.Comment = mongoose.model('Comment', commentSchema);
+
+var hookSchema = new Schema({
+  url : String,
+  created_at : Date,
+  id : Number,
+  repo: { user : String, name : String }
+}, { _id : false });
+
+hookSchema.index({ repo : 1 });
+
+module.exports.Hook = exports.Hook = mongoose.model('Hook', hookSchema);

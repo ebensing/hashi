@@ -11,6 +11,7 @@ var Workspace = AsanaModels.Workspace;
 var Project = AsanaModels.Project;
 var Task = AsanaModels.Task;
 var Issue = GithubModels.Issue;
+var Hook = GithubModels.Hook;
 
 AsanaConnector.setKey(config.asanaKey);
 
@@ -96,12 +97,34 @@ function parse(repos, workMap, projectMap) {
       });
       async.each(issues, processIssue, callback);
     });
+
+    // make sure the appropriate webhooks exist
+    checkHooks(repo);
   }, function (err) {
     if (err) {
       return onError(err);
     }
     console.log("done");
-    mongoose.disconnect();
+  });
+}
+
+function checkHooks(repo) {
+  var cond = { repo : { name : repo.name, user : repo.user } };
+  Hook.findOne(cond, function (err, hook) {
+    if (err) {
+      return onError(err);
+    }
+
+    if (hook == null) {
+      var url = config.url + ":" + config.port.toString();
+      GithubConnector.createWebHook(repo, ["issues"], url, function (err, hook) {
+        if (err) {
+          return onError(err);
+        }
+
+        console.log("Hook Created for %s/%s", repo.user, repo.name);
+      });
+    }
   });
 }
 
@@ -116,7 +139,7 @@ function processIssue(issue, callback) {
 
     if (output.results.length) {
       // found the match, go ahead and just sync'd them up
-      syncIssue(issue, output.results[0], callback);
+      syncIssue(issue, output.results[0].obj, callback);
     } else {
       // no match found, time to create a new task in Asana
       createAsanaTask(issue, tag, callback);
@@ -125,12 +148,34 @@ function processIssue(issue, callback) {
 }
 
 function syncIssue(issue, task, callback) {
-  console.log("syncing issue");
-  callback();
-}
+  var changeSet = {};
 
-function syncComments(issue, task, callback) {
+  if (issue.title != task.name) {
+    task.name = issue.title;
+    changeSet.name = issue.title;
+  }
 
+  if (issue.state == 'closed' && !task.completed) {
+    task.completed = true;
+    task.completed_at = issue.closed_at;
+    changeSet.completed = true;
+    changeSet.completed_at = issue.closed_at;
+  }
+
+  var body = "(GH " + issue.number.toString() +")\n"
+    + issue.body + "\n" + issue.url;
+
+  if (task.notes != body) {
+    task.notes = body;
+    changeSet.notes = body;
+  }
+
+  // only perform the update if there have actually been changes
+  if (Object.keys(changeSet).length !== 0) {
+    AsanaConnector.updateTask(task, changeSet, callback);
+  } else {
+    callback();
+  }
 }
 
 function createAsanaTask(issue, tag, callback) {
@@ -138,7 +183,7 @@ function createAsanaTask(issue, tag, callback) {
   var task = new Task({
     completed : false,
     name : issue.title,
-    notes : tag.replace(/\"/g,'') + "\n" + issue.body,
+    notes : tag.replace(/\"/g,'') + "\n" + issue.body + "\n" + issue.url,
     assignee_status : "inbox",
     projects : [{ id : issue.p_id }],
     workspace : { id : issue.w_id }
@@ -148,14 +193,8 @@ function createAsanaTask(issue, tag, callback) {
     if (err) {
       return callback(err);
     }
-
     var raw = cTask.toObject();
-    Task.findOneAndUpdate({ id : cTask.id }, raw, { upsert : true }, function (err, tsk) {
-      if (err) {
-        return callback(err);
-      }
-      syncComments(issue, task, callback);
-    });
+    Task.findOneAndUpdate({ id : cTask.id }, raw, { upsert : true }, callback);
   });
 }
 

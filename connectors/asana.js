@@ -184,6 +184,10 @@ AsanaConnector.prototype.createTask = function (task, callback) {
     res.on('end', function () {
       var respObj = JSON.parse(content).data;
 
+      if (respObj.message) {
+        return callback(new Error("Task Create Error, Title: " + task.name));
+      }
+
       task.id = respObj.id;
       task.assignee = respObj.assignee;
       task.workspace = respObj.workspace;
@@ -201,6 +205,49 @@ AsanaConnector.prototype.createTask = function (task, callback) {
   });
 
   // actually send the data
+  req.write(sendStr);
+  req.end();
+}
+
+AsanaConnector.prototype.updateTask = function (task, changeSet, callback) {
+
+  // prepare the data to send
+  var sendStr = qs.stringify(changeSet);
+
+  // prepare the POST options
+  var options = {
+    hostname : this.apiUrl,
+    path : this.basePath + "tasks/" + task.id.toString(),
+    method : "PUT",
+    auth : this.apiKey +":",
+    headers : {
+      'Content-Type' : 'application/x-www-form-urlencoded',
+      'Content-Length' : sendStr.length
+    }
+  };
+
+  var req = https.request(options, function (res) {
+    res.setEncoding('utf-8');
+    var content = "";
+
+    res.on('data', function (data) {
+      content += data.toString();
+    });
+
+    res.on('end', function () {
+      var respObj = JSON.parse(content).data;
+
+      if (respObj.message) {
+        return callback(new Error("Task Update Error, Id: " + task.toString()));
+      }
+
+      task.save(callback);
+    });
+  });
+  req.on('error', function (err) {
+    return callback(err);
+  });
+
   req.write(sendStr);
   req.end();
 }

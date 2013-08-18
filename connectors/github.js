@@ -4,6 +4,7 @@ var githubApi = require('github');
 var githubModels = require('../models/github.js');
 var Issue = githubModels.Issue;
 var Comment = githubModels.Comment;
+var Hook = githubModels.Hook;
 
 function GithubConnector() {
   this.userName = null;
@@ -126,5 +127,57 @@ GithubConnector.prototype.getAllCommentsForIssue = function (issue, callback) {
     }
   });
 }
+
+GithubConnector.prototype.createWebHook = function(repo, events, url, callback) {
+  this.setupAuth();
+
+  var msg = {
+    user : repo.user,
+    repo : repo.name,
+    name : "web",
+    events : events,
+    config : {
+      url : url,
+      content_type : "json"
+    }
+  };
+
+  this.github.repos.createHook(msg, function (err, hook) {
+    if (err) {
+      return callback(err);
+    }
+
+    var hook = new Hook(hook);
+    hook.repo.user = repo.user;
+    hook.repo.name = repo.name;
+
+    var raw = hook.toObject();
+    Hook.findOneAndUpdate({ id : hook.id }, raw, { upsert : true }, callback);
+  });
+}
+
+GithubConnector.prototype.deleteWebHook = function(repo, id, callback) {
+  this.setupAuth();
+
+  var msg = {
+    user : repo.user,
+    repo : repo.name,
+    id : id
+  };
+
+  this.github.repos.deleteHook(msg, callback);
+}
+
+GithubConnector.prototype.getHooks = function(repo, callback) {
+  this.setupAuth();
+
+  var msg = {
+    user : repo.user,
+    repo : repo.name
+  };
+
+  this.github.repos.getHooks(msg, callback);
+}
+
 
 module.exports = exports = new GithubConnector();

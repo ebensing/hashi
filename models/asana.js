@@ -52,7 +52,8 @@ var storySchema = new Schema({
   text : String,
   target : { id : Number, name : String },
   source : String,
-  type : String
+  type : String,
+  commentId : Number
 }, { _id : false });
 
 module.exports.Story = exports.Story = mongoose.model('Story', storySchema);
