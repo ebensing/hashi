@@ -1,6 +1,7 @@
 
 var async = require('async');
 var mongoose = require('mongoose');
+var http = require('http');
 
 var config = require('./config.js');
 var AsanaConnector = require('./connectors/asana.js');
@@ -287,4 +288,26 @@ function onError(err) {
 mongoose.connect("mongodb://localhost/taskSync", function (err) {
   if (err) throw err;
   main();
+
+  http.createServer(function (req, res) {
+    var data = "";
+    req.on('data', function (d) {
+      data += d.toString();
+    });
+
+    req.on('end', function () {
+      var reqObj;
+      try {
+        reqObj = JSON.parse(data);
+      } catch(err) {
+        return onError(err);
+      }
+      console.log(reqObj);
+    });
+
+    res.writeHead(200, "OK", { 'Content-type' : 'text/html' });
+    res.end();
+  }).listen(config.port, function () {
+    console.log("Listening on port %d", config.port);
+  });
 });
