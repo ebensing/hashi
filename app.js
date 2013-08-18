@@ -120,9 +120,14 @@ function checkHooks(repo) {
       var url = config.url + ":" + config.port.toString();
       GithubConnector.createWebHook(repo, ["issues"], url, function (err, hook) {
         if (err) {
-          return onError(err);
+          if (err.message &&
+            err.message.errors[0].message != "Hook already exists on this repository") {
+            return onError(err);
+          } else {
+            console.log("Hook already exsits, do nothing");
+            return;
+          }
         }
-
         console.log("Hook Created for %s/%s", repo.user, repo.name);
       });
     }
@@ -302,7 +307,18 @@ mongoose.connect("mongodb://localhost/taskSync", function (err) {
       } catch(err) {
         return onError(err);
       }
-      console.log(reqObj);
+
+      var issue = new Issue(reqObj.issue);
+      Issue.findOneAndUpdate({ id : issue.id }, raw, { upsert : true }, function (err, is) {
+        if (err) {
+          return onError(err);
+        }
+        processIssue(is, function (err) {
+          if (err) {
+            return onError(err);
+          }
+        });
+      });
     });
 
     res.writeHead(200, "OK", { 'Content-type' : 'text/html' });
