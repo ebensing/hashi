@@ -4,6 +4,7 @@ var Schema = mongoose.Schema;
 
 var issueSchema = new Schema({
   url : String,
+  html_url : String,
   id : Number,
   number : Number,
   title : String,

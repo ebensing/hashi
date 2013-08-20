@@ -168,7 +168,7 @@ function syncIssue(issue, task, callback) {
   }
 
   var body = "(GH " + issue.number.toString() +")\n"
-    + issue.body + "\n" + issue.url;
+    + issue.body + "\n" + issue.html_url;
 
   if (task.notes != body) {
     task.notes = body;
@@ -188,7 +188,7 @@ function createAsanaTask(issue, tag, callback) {
   var task = new Task({
     completed : false,
     name : issue.title,
-    notes : tag.replace(/\"/g,'') + "\n" + issue.body + "\n" + issue.url,
+    notes : tag.replace(/\"/g,'') + "\n" + issue.body + "\n" + issue.html_url,
     assignee_status : "inbox",
     projects : [{ id : issue.p_id }],
     workspace : { id : issue.w_id }

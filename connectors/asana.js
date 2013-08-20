@@ -242,7 +242,6 @@ AsanaConnector.prototype.updateTask = function (task, changeSet, callback) {
             + " " + respObj.message));
       }
 
-
       task.save(callback);
     });
   });
