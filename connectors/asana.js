@@ -13,9 +13,24 @@ function AsanaConnector() {
   this.basePath = "/api/1.0/";
 }
 
+/**
+ * Set the API Key
+ *
+ * @param {String} apiKey - The Asana API key
+ *
+ */
+
 AsanaConnector.prototype.setKey = function (apiKey) {
   this.apiKey = apiKey;
 }
+
+/**
+ * Gets all of the workspaces for the user associated with the API key. This
+ * returns unsaved mongoose models of the workspaces.
+ *
+ * @param {Function} callback - function(err, workspaces)
+ *
+ */
 
 AsanaConnector.prototype.getWorkspaces = function (callback) {
   var options = {
@@ -48,6 +63,15 @@ AsanaConnector.prototype.getWorkspaces = function (callback) {
   });
   req.end();
 }
+
+/**
+ * Gets all of the projects associated with a specified workspace. Returns
+ * unsaved mongoose models of the projects
+ *
+ * @param {Workspace} workspace
+ * @param {Function} callback - function(err, projects)
+ *
+ */
 
 AsanaConnector.prototype.getProjects = function (workspace, callback) {
   var options = {
@@ -82,6 +106,15 @@ AsanaConnector.prototype.getProjects = function (workspace, callback) {
   });
   req.end();
 }
+
+/**
+ * Get all of the tasks associated with a given project. Returns unsaved
+ * mongoose models of the tasks
+ *
+ * @param {Project} project
+ * @param {Function} callback - function(err, tasks)
+ *
+ */
 
 AsanaConnector.prototype.getTasksByProject = function (project, callback) {
   var options = {
@@ -118,6 +151,15 @@ AsanaConnector.prototype.getTasksByProject = function (project, callback) {
   req.end();
 }
 
+/**
+ * Get all of the stories associated with a given task. Returns unsaved
+ * mongoose models of the stories
+ *
+ * @param {Task} task
+ * @param {Function} callback - function(err, stories)
+ *
+ */
+
 AsanaConnector.prototype.getStories = function (task, callback) {
   var options = {
     hostname : this.apiUrl,
@@ -151,6 +193,16 @@ AsanaConnector.prototype.getStories = function (task, callback) {
   });
   req.end();
 }
+
+/**
+ * Creates a task in Asana
+ *
+ * **Note** The returned task is not saved to the DB.
+ *
+ * @param {Task} task - This is a mongoose model of a Task
+ * @param {Function} callback - function(err, task)
+ *
+ */
 
 AsanaConnector.prototype.createTask = function (task, callback) {
 
@@ -208,6 +260,18 @@ AsanaConnector.prototype.createTask = function (task, callback) {
   req.write(sendStr);
   req.end();
 }
+
+/**
+ *
+ * Update an existing task in Asana
+ *
+ * **Note** The returned task is saved to the DB
+ *
+ * @param {Task} task
+ * @param {Object} changeSet - set of attributes to change on the task
+ * @param {Function} callback - function(err, task)
+ *
+ */
 
 AsanaConnector.prototype.updateTask = function (task, changeSet, callback) {
 
