@@ -14,10 +14,24 @@ function GithubConnector() {
   });
 }
 
+/**
+ * Set the Github Authentication information
+ *
+ * @param {String} username
+ * @param {String} password
+ *
+ */
+
 GithubConnector.prototype.setAuthInfo = function (userName, password) {
   this.userName = userName;
   this.password = password;
 }
+
+/**
+ * Internal function to setup auth before each method
+ *
+ * @private
+ */
 
 GithubConnector.prototype.setupAuth = function () {
   this.github.authenticate({
@@ -26,6 +40,16 @@ GithubConnector.prototype.setupAuth = function () {
     password : this.password
   });
 }
+
+/**
+ * Get all of the issues associated with a given repo that are assigned to a
+ * specified user. Returns unsaved mongoose models of the issues
+ *
+ * @param {Object} repo - { user : ..., name : ... }
+ * @param {String} user
+ * @param {Function} callback - function(err, issues)
+ *
+ */
 
 GithubConnector.prototype.getAllRepoIssues = function (repo, user, callback) {
   this.setupAuth();
@@ -76,6 +100,16 @@ GithubConnector.prototype.getAllRepoIssues = function (repo, user, callback) {
     }
   });
 }
+
+/**
+ *
+ * Get all of the comments for a specified issue. Return unsaved mongoose
+ * models of the comments
+ *
+ * @param {Issue} issue
+ * @param {Function} callback - function(err, comments)
+ *
+ */
 
 GithubConnector.prototype.getAllCommentsForIssue = function (issue, callback) {
   this.setupAuth();
@@ -128,6 +162,17 @@ GithubConnector.prototype.getAllCommentsForIssue = function (issue, callback) {
   });
 }
 
+/**
+ *
+ * Creates a webhook on a repository
+ *
+ * @param {Object} repo - { user : ..., name : ... }
+ * @param {Array} events - an array of the string names for the events to watch
+ * @param {String} url - ping url for the webhook
+ * @param {Function} callback - function(err, hook)
+ *
+ */
+
 GithubConnector.prototype.createWebHook = function(repo, events, url, callback) {
   this.setupAuth();
 
@@ -163,6 +208,16 @@ GithubConnector.prototype.createWebHook = function(repo, events, url, callback) 
   });
 }
 
+/**
+ *
+ * Deletes a webhook on a repo
+ *
+ * @param {Object} repo
+ * @param {Number} id - id of the webhook
+ * @param {Function} callback - function(err)
+ *
+ */
+
 GithubConnector.prototype.deleteWebHook = function(repo, id, callback) {
   this.setupAuth();
 
@@ -174,6 +229,15 @@ GithubConnector.prototype.deleteWebHook = function(repo, id, callback) {
 
   this.github.repos.deleteHook(msg, callback);
 }
+
+/**
+ *
+ * Get all of the webhooks on a repo
+ *
+ * @param {Object} repo
+ * @param {Function} callback - function(err, hooks)
+ *
+ */
 
 GithubConnector.prototype.getHooks = function(repo, callback) {
   this.setupAuth();
