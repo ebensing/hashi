@@ -1,6 +1,6 @@
 {
-  "name": "taskSync",
-  "version": "0.0.0",
+  "name": "hashi",
+  "version": "0.1.0",
   "description": "Sync tasks between Github & Asana",
   "main": "app.js",
   "scripts": {
@@ -8,13 +8,13 @@
   },
   "dependencies" : {
     "mongoose" : "3.7.2",
-    "github" : "*",
-    "async" : "*",
-    "mongoose-text-search" : "*"
+    "github" : "0.1.10",
+    "async" : "0.2.9",
+    "mongoose-text-search" : "0.0.2"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ebensing/taskSync"
+    "url": "https://github.com/ebensing/hashi"
   },
   "keywords": [
     "task",
@@ -26,6 +26,6 @@
   "author": "E.J. Bensing",
   "license": "BSD",
   "bugs": {
-    "url": "https://github.com/ebensing/taskSync/issues"
+    "url": "https://github.com/ebensing/hashi/issues"
   }
 }
