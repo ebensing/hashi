@@ -11,13 +11,21 @@ and work flow. I also really like Github, but really hated having to keep track
 of my assigned issues on Github and in Asana. So, I made Hashi to help do that
 for me.
 
+There are other services that allow you to do this, but their free tiers had
+limits that were annoying.
+
 Installation
 =============
 
 I've only tested this running on Ubuntu, so ymmv on other platforms. If you are
-using something with apt-get, install is as easy as running the install.sh
-script included. If you are not, then you need to get the following
-dependencies installed:
+using something with apt-get, install is as easy as running the `install.sh`
+script included. Once you have run this script successfully, you can go ahead
+and skip the rest of this section.
+
+**Note**: If you already have MongoDB installed, you need to enable text
+search, see below for more information. 
+
+If you are not, then you need to get the following dependencies installed:
 
 1. [Node.js](http://nodejs.org/download/)
 2. [MongoDB](http://docs.mongodb.org/manual/installation/)
