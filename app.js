@@ -20,9 +20,15 @@ AsanaConnector.setKey(config.asanaKey);
 GithubConnector.setAuthInfo(config.githubInfo.userName,
     config.githubInfo.password);
 
+// 10 minutes between runs of the main sync function
+var INTERVAL = 60 * 10 * 1000;
+
 /**
  * This is the main startup method. It will also run periodically to make sure
  * everything is in sync.
+ *
+ * Might be necessary to synchronize these runs with anything going on in the
+ * Webhook. But going to wait and see on that one.
  */
 
 function main() {
@@ -121,6 +127,9 @@ function parse(repos, workMap, projectMap) {
     if (err) {
       return onError(err);
     }
+    setTimeout(function () {
+      main();
+    }, INTERVAL);
     console.log("done");
   });
 }
