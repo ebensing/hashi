@@ -234,11 +234,14 @@ AsanaConnector.prototype.createTask = function (task, callback) {
     });
 
     res.on('end', function () {
-      var respObj = JSON.parse(content).data;
+      var respObj = JSON.parse(content);
 
       if (respObj.message) {
         return callback(new Error("Task Create Error, Title: " + task.name));
       }
+
+      // just to make referencing things easier
+      respObj = respObj.data;
 
       task.id = respObj.id;
       task.assignee = respObj.assignee;
