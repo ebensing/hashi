@@ -33,6 +33,7 @@ AsanaConnector.prototype.setKey = function (apiKey) {
  */
 
 AsanaConnector.prototype.getWorkspaces = function (callback) {
+  var errSeen = false;
   var options = {
     hostname : this.apiUrl,
     path : this.basePath + "workspaces",
@@ -55,10 +56,11 @@ AsanaConnector.prototype.getWorkspaces = function (callback) {
         workspaces.push(new Workspace(respObj.data[i]));
       }
 
-      return callback(null, workspaces);
+      return !errSeen && callback(null, workspaces);
     });
   });
   req.on('error', function (err) {
+    errSeen = true;
     return callback(err);
   });
   req.end();
@@ -74,6 +76,7 @@ AsanaConnector.prototype.getWorkspaces = function (callback) {
  */
 
 AsanaConnector.prototype.getProjects = function (workspace, callback) {
+  var errSeen = false;
   var options = {
     hostname : this.apiUrl,
     path : this.basePath + "workspaces/" + workspace.id.toString() + "/projects",
@@ -98,10 +101,11 @@ AsanaConnector.prototype.getProjects = function (workspace, callback) {
         projects.push(p);
       }
 
-      return callback(null, projects);
+      return !errSeen && callback(null, projects);
     });
   });
   req.on('error', function (err) {
+    errSeen = true;
     return callback(err);
   });
   req.end();
@@ -117,6 +121,7 @@ AsanaConnector.prototype.getProjects = function (workspace, callback) {
  */
 
 AsanaConnector.prototype.getTasksByProject = function (project, callback) {
+  var errSeen = false;
   var options = {
     hostname : this.apiUrl,
     path : this.basePath + "projects/" + project.id.toString() + "/tasks",
@@ -142,10 +147,11 @@ AsanaConnector.prototype.getTasksByProject = function (project, callback) {
         tasks.push(t);
       }
 
-      return callback(null, tasks);
+      return !errSeen && callback(null, tasks);
     });
   });
   req.on('error', function (err) {
+    errSeen = true;
     return callback(err);
   });
   req.end();
@@ -161,6 +167,7 @@ AsanaConnector.prototype.getTasksByProject = function (project, callback) {
  */
 
 AsanaConnector.prototype.getStories = function (task, callback) {
+  var errSeen = false;
   var options = {
     hostname : this.apiUrl,
     path : this.basePath + "tasks/" + task.id.toString() + "/stories",
@@ -185,10 +192,11 @@ AsanaConnector.prototype.getStories = function (task, callback) {
         stories.push(s);
       }
 
-      return callback(null, stories);
+      return !errSeen && callback(null, stories);
     });
   });
   req.on('error', function (err) {
+    errSeen = true;
     return callback(err);
   });
   req.end();
@@ -205,7 +213,7 @@ AsanaConnector.prototype.getStories = function (task, callback) {
  */
 
 AsanaConnector.prototype.createTask = function (task, callback) {
-
+  var errSeen = false;
   // prepare the data to send
   var raw = task.toObject();
   raw.assignee = "me";
@@ -252,10 +260,11 @@ AsanaConnector.prototype.createTask = function (task, callback) {
 
       var rt = new Task(task);
 
-      return callback(null, rt);
+      return !errSeen && callback(null, rt);
     });
   });
   req.on('error', function (err) {
+    errSeen = true;
     return callback(err);
   });
 
@@ -277,7 +286,7 @@ AsanaConnector.prototype.createTask = function (task, callback) {
  */
 
 AsanaConnector.prototype.updateTask = function (task, changeSet, callback) {
-
+  var errSeen = false;
   // prepare the data to send
   var sendStr = qs.stringify(changeSet);
 
@@ -309,10 +318,11 @@ AsanaConnector.prototype.updateTask = function (task, changeSet, callback) {
             + " " + respObj.message));
       }
 
-      task.save(callback);
+      !errSeen && task.save(callback);
     });
   });
   req.on('error', function (err) {
+    errSeen = true;
     return callback(err);
   });
 
