@@ -47,17 +47,19 @@ GithubConnector.prototype.setupAuth = function () {
  *
  * @param {Object} repo - { user : ..., name : ... }
  * @param {String} user
+ * @param {String} state - should be "open" or "closed"
  * @param {Function} callback - function(err, issues)
  *
  */
 
-GithubConnector.prototype.getAllRepoIssues = function (repo, user, callback) {
+GithubConnector.prototype.getAllRepoIssues = function (repo, user, state,callback) {
   this.setupAuth();
 
   var msg = {
     user : repo.user,
     repo : repo.name,
     assignee : user,
+    state : state,
     per_page : 100
   };
   var rIssues = [];

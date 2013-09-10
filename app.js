@@ -281,11 +281,17 @@ function createAsanaTask(issue, tag, callback) {
 
 function getAllIssues(repos, callback) {
   async.each(repos, function (repo, cb) {
-    GithubConnector.getAllRepoIssues(repo, repo.assignee, function (err, issues) {
+    GithubConnector.getAllRepoIssues(repo, repo.assignee, "open", function (err, issues) {
       if (err) {
         return callback(err);
       }
-      saveItems(issues, Issue, cb);
+      GithubConnector.getAllRepoIssues(repo, repo.assignee, "closed", function (err, closed) {
+        if (err) {
+          return callback(err);
+        }
+        var all = issues.concat(closed);
+        saveItems(all, Issue, cb);
+      });
     });
   }, callback);
 }

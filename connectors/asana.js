@@ -251,6 +251,11 @@ AsanaConnector.prototype.createTask = function (task, callback) {
       // just to make referencing things easier
       respObj = respObj.data;
 
+      if (!respObj.id) {
+        console.log("resp obj no id");
+        console.log(respObj);
+      }
+
       task.id = respObj.id;
       task.assignee = respObj.assignee;
       task.workspace = respObj.workspace;
