@@ -249,7 +249,9 @@ AsanaConnector.prototype.createTask = function (task, callback) {
       }
 
       // just to make referencing things easier
-      respObj = respObj.data;
+      if (respObj.data) {
+        respObj = respObj.data;
+      }
 
       if (!respObj.id) {
         console.log("resp obj no id");
