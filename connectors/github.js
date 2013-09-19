@@ -2,6 +2,7 @@
 var githubApi = require('github');
 
 var githubModels = require('../models/github.js');
+var utils = require('../utils.js');
 var Issue = githubModels.Issue;
 var Comment = githubModels.Comment;
 var Hook = githubModels.Hook;

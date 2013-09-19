@@ -2,6 +2,7 @@
 var https = require('https');
 var qs = require('querystring');
 var asanaModels = require('../models/asana.js');
+var utils = require('../utils.js');
 var Workspace = asanaModels.Workspace;
 var Project = asanaModels.Project;
 var Task = asanaModels.Task;
@@ -49,7 +50,11 @@ AsanaConnector.prototype.getWorkspaces = function (callback) {
     });
 
     res.on('end', function () {
-      var respObj = JSON.parse(content);
+      var respObj = utils.parseJSON(content);
+
+      if (respObj instanceof Error) {
+        return callback(respObj);
+      }
 
       var workspaces = [];
       for (var i=0; i < respObj.data.length; i++) {
@@ -92,7 +97,11 @@ AsanaConnector.prototype.getProjects = function (workspace, callback) {
     });
 
     res.on('end', function () {
-      var respObj = JSON.parse(content);
+      var respObj = utils.parseJSON(content);
+
+      if (respObj instanceof Error) {
+        return callback(respObj);
+      }
 
       var projects = [];
       for (var i=0; i < respObj.data.length; i++) {
@@ -137,7 +146,11 @@ AsanaConnector.prototype.getTasksByProject = function (project, callback) {
     });
 
     res.on('end', function () {
-      var respObj = JSON.parse(content);
+      var respObj = utils.parseJSON(content);
+
+      if (respObj instanceof Error) {
+        return callback(respObj);
+      }
 
       var tasks = [];
       for (var i=0; i < respObj.data.length; i++) {
@@ -183,7 +196,11 @@ AsanaConnector.prototype.getStories = function (task, callback) {
     });
 
     res.on('end', function () {
-      var respObj = JSON.parse(content);
+      var respObj = utils.parseJSON(content);
+
+      if (respObj instanceof Error) {
+        return callback(respObj);
+      }
 
       var stories = [];
       for (var i=0; i < respObj.data.length; i++) {
@@ -242,7 +259,11 @@ AsanaConnector.prototype.createTask = function (task, callback) {
     });
 
     res.on('end', function () {
-      var respObj = JSON.parse(content);
+      var respObj = utils.parseJSON(content);
+
+      if (respObj instanceof Error) {
+        return callback(respObj);
+      }
 
       if (respObj.message) {
         return callback(new Error("Task Create Error, Title: " + task.name));
@@ -318,7 +339,11 @@ AsanaConnector.prototype.updateTask = function (task, changeSet, callback) {
     });
 
     res.on('end', function () {
-      var respObj = JSON.parse(content);
+      var respObj = utils.parseJSON(content);
+
+      if (respObj instanceof Error) {
+        return callback(respObj);
+      }
 
       if (respObj.message) {
         return callback(new Error("Task Update Error, Id: " + task.toString()

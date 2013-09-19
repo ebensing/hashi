@@ -124,12 +124,12 @@ function parse(repos, workMap, projectMap) {
     // make sure the appropriate webhooks exist
     checkHooks(repo);
   }, function (err) {
-    if (err) {
-      return onError(err);
-    }
     setTimeout(function () {
       main();
     }, INTERVAL);
+    if (err) {
+      return onError(err);
+    }
     console.log("done");
   });
 }
