@@ -4,7 +4,7 @@
  *
  */
 
-var utils = {}:
+var utils = {};
 
 /**
  * This parses JSON and automatically catches parse errors
