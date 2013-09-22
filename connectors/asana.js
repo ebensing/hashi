@@ -282,7 +282,10 @@ AsanaConnector.prototype.createTask = function (task, callback) {
       task.id = respObj.id;
       task.assignee = respObj.assignee;
       task.workspace = respObj.workspace;
-      task.projects[0] = respObj.projects[0];
+      // not all tasks are assigned to projects
+      if (respObj.projects.length) {
+        task.projects[0] = respObj.projects[0];
+      }
       task.created_at = respObj.created_at;
       task.modified_at = respObj.modified_at;
 
