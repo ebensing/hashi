@@ -269,26 +269,30 @@ AsanaConnector.prototype.createTask = function (task, callback) {
         return callback(new Error("Task Create Error, Title: " + task.name));
       }
 
-      // just to make referencing things easier
-      if (respObj.data) {
-        respObj = respObj.data;
-      }
+      try {
+        // just to make referencing things easier
+        if (respObj.data) {
+          respObj = respObj.data;
+        }
 
-      if (!respObj.id) {
-        console.log("resp obj no id");
-        console.log(respObj);
-      }
+        if (!respObj.id) {
+          console.log("resp obj no id");
+          console.log(respObj);
+        }
 
-      task.id = respObj.id;
-      task.assignee = respObj.assignee;
-      task.workspace = respObj.workspace;
-      // not all tasks are assigned to projects
-      if (respObj.projects.length) {
-        task.projects[0] = respObj.projects[0];
+        task.id = respObj.id;
+        task.assignee = respObj.assignee;
+        task.workspace = respObj.workspace;
+        // not all tasks are assigned to projects
+        if (respObj.projects.length) {
+          task.projects[0] = respObj.projects[0];
+        }
+        task.created_at = respObj.created_at;
+        task.modified_at = respObj.modified_at;
+      } catch (err) {
+        err.object = respObj;
+        return callback(err);
       }
-      task.created_at = respObj.created_at;
-      task.modified_at = respObj.modified_at;
-
       var rt = new Task(task);
 
       return !errSeen && callback(null, rt);

@@ -411,7 +411,6 @@ function getMonitoredTasks(projects, callback) {
 
 function onError(err) {
   console.log(err);
-  mongoose.disconnect();
 }
 
 /**
