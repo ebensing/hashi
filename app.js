@@ -118,6 +118,7 @@ function parse(repos, workMap, projectMap) {
         item.w_id = workMap[repo.workspace];
         return item;
       });
+      console.log(issues);
       async.each(issues, processIssue, callback);
     });
 
