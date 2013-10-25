@@ -31,10 +31,11 @@ var INTERVAL = 60 * 10 * 1000;
  * Webhook. But going to wait and see on that one.
  */
 
+var workMap = {};
+var projectMap = {};
+
 function main() {
 
-  var workMap = {};
-  var projectMap = {};
 
   var dataGathered = false;
   function cont(err) {
@@ -116,16 +117,20 @@ function parse(repos, workMap, projectMap) {
       issues = issues.map(function (item) {
         item.p_id = projectMap[repo.project];
         item.w_id = workMap[repo.workspace];
+        if (item.p_id == undefined || item.w_id == undefined) {
+          console.log("weirdness");
+          console.log(item);
+        }
         return item;
       });
-      console.log(issues);
+
       async.each(issues, processIssue, callback);
     });
 
     // make sure the appropriate webhooks exist
     checkHooks(repo);
   }, function (err) {
-    setTimeout(function () {
+    setInterval(function () {
       main();
     }, INTERVAL);
     if (err) {
@@ -415,6 +420,27 @@ function onError(err) {
 }
 
 /**
+ * This function will get a binding for an issue if it exists
+ *
+ * @param {String} full repository name
+ * @param {User} github User object
+ * @return {Binding} binding for the issue or null if none is found
+ *
+ */
+
+
+function getBinding(repo_name, user) {
+  for (var i=0; i < config.bindings.length; i++) {
+    var binding = config.bindings[i];
+    if (binding.repo == repo_name && binding.githubUser == user.login) {
+      return binding;
+    }
+  }
+
+  return null;
+}
+
+/**
  * Connect to the database
  */
 
@@ -438,18 +464,26 @@ mongoose.connect("mongodb://localhost/hashi", function (err) {
         return onError(err);
       }
 
-      var issue = new Issue(reqObj.issue);
-      var raw = issue.toObject();
-      Issue.findOneAndUpdate({ id : issue.id }, raw, { upsert : true }, function (err, is) {
-        if (err) {
-          return onError(err);
-        }
-        processIssue(is, function (err) {
+      var binding = getBinding(reqObj.repository.full_name, reqObj.issue.assignee);
+
+      if (binding) {
+        var issue = new Issue(reqObj.issue);
+        var raw = issue.toObject();
+        Issue.findOneAndUpdate({ id : issue.id }, raw, { upsert : true }, function (err, is) {
           if (err) {
             return onError(err);
           }
+
+          is.p_id = projectMap[binding.project];
+          is.w_id = workMap[binding.workspace];
+
+          processIssue(is, function (err) {
+            if (err) {
+              return onError(err);
+            }
+          });
         });
-      });
+      }
     });
 
     res.writeHead(200, "OK", { 'Content-type' : 'text/html' });
