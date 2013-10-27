@@ -185,7 +185,7 @@ function checkHooks(repo) {
 
 function processIssue(issue, callback) {
 
-  var tag = '"(gh ' + issue.number.toString() + ')"';
+  var tag = '"(GH ' + issue.number.toString() + ')"';
 
   Task.textSearch(tag, function (err, output) {
     if (err) {
