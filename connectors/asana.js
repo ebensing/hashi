@@ -56,6 +56,12 @@ AsanaConnector.prototype.getWorkspaces = function (callback) {
         return callback(respObj);
       }
 
+      if (respObj.data === undefined) {
+        var err = new Error("data is undefined");
+        err.response = respObj;
+        return callback(err);
+      }
+
       var workspaces = [];
       for (var i=0; i < respObj.data.length; i++) {
         workspaces.push(new Workspace(respObj.data[i]));
@@ -277,6 +283,7 @@ AsanaConnector.prototype.createTask = function (task, callback) {
 
         if (!respObj.id) {
           console.log("resp obj no id");
+          console.log(raw);
           console.log(respObj);
         }
 
