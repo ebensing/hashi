@@ -21,7 +21,7 @@ GithubConnector.setAuthInfo(config.githubInfo.userName,
     config.githubInfo.password);
 
 // 10 minutes between runs of the main sync function
-var INTERVAL = 60 * 10 * 1000;
+var INTERVAL = 60 * 20 * 1000;
 
 /**
  * This is the main startup method. It will also run periodically to make sure
