@@ -130,11 +130,11 @@ function parse(repos, workMap, projectMap) {
     // make sure the appropriate webhooks exist
     checkHooks(repo);
   }, function (err) {
-    setInterval(function () {
+    setTimeout(function () {
       main();
     }, INTERVAL);
     if (err) {
-      return onError(err);
+      return onError(err, true);
     }
     console.log("done");
   });
@@ -415,8 +415,13 @@ function getMonitoredTasks(projects, callback) {
  *
  */
 
-function onError(err) {
+function onError(err, alreadyStarted) {
   console.log(err);
+  if (alreadyStarted != true) {
+    setTimeout(function () {
+      main();
+    }, INTERVAL);
+  }
 }
 
 /**
